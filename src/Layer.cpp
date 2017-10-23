@@ -15,7 +15,7 @@ Layer::Layer(unsigned int nNeurons, unsigned int iSize, float iWeight) {
 	input.resize(inputSize,0);
 	error.resize(numNeurons,0);
 	output.resize(numNeurons,0);
-	sigOutput.resize(inputSize,0);
+	sigOutput.resize(numNeurons,0);
 	weights.resize(numNeurons*inputSize,iWeight);
 }
 
@@ -27,12 +27,20 @@ unsigned int Layer::getNumNeurons(){
 	return numNeurons;
 }
 
+std::vector<float> Layer::getError(){
+	return error;
+}
+
+std::vector<float> Layer::getWeights(){
+	return weights;
+}
+
 unsigned int Layer::getInputSize(){
 	return inputSize;
 }
 
 std::vector<float> Layer::getOutput(){
-	return output;
+	return sigOutput;
 }
 
 void Layer::write(){
@@ -48,18 +56,24 @@ void Layer::write(){
 	for(unsigned int i = 0; i < numNeurons; ++i){
 		std::cout << output[i] << " " << std::endl;
 	}
+	std::cout << "sigOutput:" << std::endl;
+	for(unsigned int i = 0; i < numNeurons; ++i){
+		std::cout << sigOutput[i] << " " << std::endl;
+	}
+
+	std::cout << "Error:" << std::endl;
+	for(unsigned int i = 0; i < numNeurons; ++i){
+		std::cout << error[i] << " " << std::endl;
+	}
+
 }
 
 void Layer::genOutput(std::vector<float> in){
 
 	input = in;
-	for(int i = 0; i < inputSize;++i){
-		std::cout << input[i] << " ";
-	}
-	std::cout<<std::endl;
 	output = vectorMatrixMultiplication(input, weights, numNeurons, inputSize);
 
-	for(unsigned int i = 0; i < inputSize; ++i){
+	for(unsigned int i = 0; i < numNeurons; ++i){
 		sigOutput[i] = sigmoid(output[i]);
 	}
 }
@@ -68,7 +82,11 @@ float Layer::sigmoid(float input){
 	return 1.0 / (1.0 + std::exp(-input));
 }
 
-void Layer::calculateError(std::vector<float> predictedLabel, std::vector<std::string> labels, std::string rightLabel){
+float Layer::dSigmoid(float input){
+	return std::exp(-input)/((1+std::exp(-input))*(1+std::exp(-input)));
+}
+
+void Layer::calculateOutputError(std::vector<float> predictedLabel, std::vector<std::string> labels, std::string rightLabel){
 
 	std::vector<float> rLabels(predictedLabel.size(),0);
 
@@ -78,24 +96,36 @@ void Layer::calculateError(std::vector<float> predictedLabel, std::vector<std::s
 
 	for(unsigned int i = 0; i < error.size(); ++i){
 		error[i] = rLabels[i] - predictedLabel[i];
+		//std::cout << rLabels[i] << std::endl;
+		//std::cout << predictedLabel[i] << std::endl;
+		//std::cout << error[i] << std::endl;
 	}
 }
 
-void Layer::updateWeights(){
-	std::vector<float> weightsT = matrixTranspose(weights);
+void Layer::calculateError(std::vector<float> nextLayerError, std::vector<float> nextLayerWeights, unsigned int nNeurons, unsigned int iSize){
+	std::cout << "entrou" << std::endl;
+	std::vector<float> weightsT = matrixTranspose(nextLayerWeights);
+	std::cout << "calculou" << std::endl;
+	error = vectorMatrixMultiplication(nextLayerError, weightsT, iSize, nNeurons);
+	std::cout << "saiu" << std::endl;
+}
 
-	/*for(unsigned int i = 0; i < error.size(); ++i){
-		float error = 0;
-		for(unsigned int j = 0; j < numNeurons; ++j){
-			unsigned int index = i * numNeurons + j;
-			error += weights[index]*error[i] ;
+void Layer::updateWeights(){
+	for(unsigned int i = 0; i < numNeurons; ++i){
+		for(unsigned int j = 0; j < inputSize; ++j){
+			unsigned int index = i * inputSize + j;
+			weights[index] += error[i] * dSigmoid(output[i]) * input[j];
+			//std::cout << error[i]  << std::endl;
 		}
-	}*/
+	}
 }
 
 std::vector<float> Layer::vectorMatrixMultiplication(const std::vector<float>& v, const std::vector<float>& m, unsigned int nRows, unsigned int nCols){
-	std::vector<float> result(nRows,0);
-	std::cout << v.size() << std::endl;
+	std::cout << "entrou0" << std::endl;
+	std::vector<float> result;
+	std::cout << "entrou1" << std::endl;
+	result.resize(nRows,0); //<-----------------------
+	std::cout << "entrou2" << std::endl;
 	for(unsigned int i = 0; i < nRows; ++i){
 		for(unsigned int j = 0; j < nCols; ++j){
 			result[i] += v[j] * m[i*nCols+j];

@@ -39,11 +39,13 @@ public:
 	void updateWeights();
 	unsigned int getInputSize();
 	unsigned int getNumNeurons();
+	std::vector<float> getError();
 	std::vector<float> getOutput();
+	std::vector<float> getWeights();
 	void genOutput(std::vector<float> in);
-	void calculateError(std::vector<float> predictedLabel, std::vector<std::string> labels, std::string rightLabel);
+	void calculateError(std::vector<float> nextLayerError, std::vector<float> nextLayerWeights, unsigned int nNeurons, unsigned int iSize);
+	void calculateOutputError(std::vector<float> predictedLabel, std::vector<std::string> labels, std::string rightLabel);
 };
+}
 
-} /* namespace nn */
-
-#endif /* LAYER_HPP_ */
+#endif
