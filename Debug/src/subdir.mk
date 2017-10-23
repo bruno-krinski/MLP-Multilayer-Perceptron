@@ -5,14 +5,20 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/Dataset.cpp \
+../src/Layer.cpp \
+../src/MLP.cpp \
 ../src/main.cpp 
 
 OBJS += \
 ./src/Dataset.o \
+./src/Layer.o \
+./src/MLP.o \
 ./src/main.o 
 
 CPP_DEPS += \
 ./src/Dataset.d \
+./src/Layer.d \
+./src/MLP.d \
 ./src/main.d 
 
 

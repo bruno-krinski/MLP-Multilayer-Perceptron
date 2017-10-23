@@ -19,26 +19,28 @@ namespace nn {
 class Dataset {
 
 private:
-	unsigned int numVectors; // Number of feature vectors.
-	unsigned int numFeatures; // Number of features in each feature vector.
-
-	/* A matrix to store all features feature vectors.
-	 * To access each feature, the index must be calculated as the follow:
-	 * feature =  i * numFeatures + j;
-	 * Where 'i' is the feature vector index and 'j' is the feature index.
-	 */
+	unsigned int numClasses;
+	unsigned int numVectors;
+	unsigned int numFeatures;
+	std::vector<std::string> labels;
+	std::vector<std::string> classes;
 	std::vector<float> featureVectors;
-	std::vector<std::string> labels; // A vector of labels.
-	std::vector<std::string> splitString(std::string str); // A function to split a string
+
+	std::vector<std::string> splitString(std::string str);
 
 public:
 	Dataset(std::string filePath);
 	virtual ~Dataset();
-	std::vector<float> getFeatures();
-	std::vector<std::string> getLabels();
+
 	void write();
+	unsigned int getNumClasses();
+	unsigned int getNumVectors();
+	unsigned int getNumFeatures();
+	std::vector<std::string> getLabels();
+	std::vector<std::string> getClasses();
+	std::string getLabel(unsigned int index);
+	std::vector<float> getFeatures(unsigned int index);
 };
+}
 
-} /* namespace nn */
-
-#endif /* DATASET_HPP_ */
+#endif

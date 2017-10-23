@@ -10,16 +10,16 @@
 namespace nn {
 
 Dataset::Dataset(std::string filePath) {
-	/* Input: A string containing the path to the file with dataset.
-	 * This will read the dataset in file.
-	 */
+
 	std::ifstream data_file(filePath);
 	std::string line;
 
 	if(data_file.is_open()){
-		/* The first line of file must contain the number of vectors
-		 * and the number of features in each vector.
-		 */
+
+		std::getline(data_file,line);
+		classes = splitString(line);
+		numClasses = classes.size();
+
 		std::getline(data_file,line);
 		std::vector<std::string> first_line = splitString(line);
 		numVectors = std::stoi(first_line[0]);
@@ -31,8 +31,8 @@ Dataset::Dataset(std::string filePath) {
 			std::getline(data_file,line);
 			std::vector<std::string> splited_line = splitString(line);
 			labels[i] = splited_line[0];
-			for(unsigned int j = 1; j < numFeatures; ++j){
-				int index = i * numFeatures + j;
+			for(unsigned int j = 1; j <= numFeatures; ++j){
+				int index = i * numFeatures + j - 1;
 				featureVectors[index] = std::stof(splited_line[j]);
 			}
 		}
@@ -57,6 +57,16 @@ std::vector<std::string> Dataset::splitString(std::string str){
 }
 
 void Dataset::write(){
+	std::cout << "Number of classes:" << numClasses << std::endl;
+
+	std::string str = "[";
+
+	for(unsigned int i = 0; i < (numClasses-1); ++i){
+		str += classes[i] + ",";
+	}
+	str += classes[numClasses-1] + "]";
+	std::cout << str << std::endl;
+
 	std::cout << "Number of vectors: " << numVectors << std::endl;
 	std::cout << "Number of features: " << numFeatures << std::endl;
 
@@ -72,4 +82,31 @@ void Dataset::write(){
 	}
 }
 
-} /* namespace nn */
+std::vector<float> Dataset::getFeatures(unsigned int index){
+	std::vector<float> slice;
+	for(unsigned int i = 0; i < numFeatures; ++i){
+		slice.push_back(featureVectors[index*numFeatures+i]);
+	}
+	return slice;
+}
+
+unsigned int Dataset::getNumFeatures(){
+	return numFeatures;
+}
+
+unsigned int Dataset::getNumVectors(){
+	return numVectors;
+}
+
+unsigned int Dataset::getNumClasses(){
+	return numClasses;
+}
+
+std::vector<std::string> Dataset::getClasses(){
+	return classes;
+}
+
+std::string Dataset::getLabel(unsigned int index){
+	return labels[index];
+}
+}
